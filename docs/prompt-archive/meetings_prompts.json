@@ -1,0 +1,46 @@
+[
+  {
+    "task_name": "Action Items Tracker",
+    "prompt": "**1. Role & Goal:** Act as a diligent project coordinator to build a live Action Item Tracker that captures all actionable tasks and their current status.\n\n**2. Core Instruction:** Scan the full transcript and extract every explicit action item (assigned tasks, requests with owners, or commitments). For each item, infer its current status from surrounding language. Normalize owner names to the exact spoken form. If a due date is explicitly stated, capture it; if only relative (e.g., \"next Friday\"), leave blank rather than guessing.\n\n**3. Formatting Constraints:** Output MUST be a Markdown table with exactly these columns, in order: 'Task' | 'Assigned To' | 'Due Date' | 'Status'. Allowed 'Status' values: 'New' | 'In Progress' | 'Completed' | 'Blocked'. Use YYYY-MM-DD when a specific date is stated; otherwise leave blank. Sort rows by Due Date (soonest first), then Task alphabetically.\n\n**4. Negative Constraints:** If no action items are found, respond with exactly: `No action items identified in this section.` Output ONLY the table or the fallback phrase."
+  },
+  {
+    "task_name": "Key Decisions Log",
+    "prompt": "**1. Role & Goal:** Act as a meticulous record-keeper and analyst. Capture final decisions and synthesize their strategic significance.\n\n**2. Core Instruction:** First extract all final decisions explicitly agreed by participants. Then, derive 'Top 3 Takeaways' strictly from those decisions—do not use other transcript content.\n\n**3. Formatting Constraints:**\n**Section 1 - Key Decisions Log:** numbered list; each item states the decision and who made the final call or who agreed.\n**Section 2 - Top 3 Takeaways:** add a Level 3 heading '### Top 3 Takeaways from Decisions' followed by a numbered list of exactly three takeaways derived only from Section 1.\n\n**4. Negative Constraints:** Exclude options discussed but not chosen. Takeaways must reference only decisions listed in Section 1."
+  },
+  {
+    "task_name": "Client Expectations Report",
+    "prompt": "**1. Role & Goal:** Act as a client relationship manager and behavioral analyst.\n\n**2. Core Instruction:** Capture explicit delivery expectations, implicit relational expectations, and assess perceived emotional state—each supported by evidence from the transcript.\n\n**3. Formatting Constraints:** Use Level 3 headings exactly:\n### Explicit Expectations (To-Dos)\n### Implicit Expectations (Relational)\n### Client's Perceived Emotional State\nUnder 'Explicit', bullet concrete tasks/deliverables/deadlines. Under 'Implicit' and 'Emotional State', justify each point with a direct quote or specific example (include speaker/timestamp if present).\n\n**4. Negative Constraints:** Output ONLY the report sections. Do not add filler."
+  },
+  {
+    "task_name": "Friction & Foresight Report",
+    "prompt": "**1. Role & Goal:** Act as an experienced mediator and strategic advisor.\n\n**2. Core Instruction:** Provide (1) explicitly stated disagreements/open loops and (2) predicted future friction based on perspectives/subtext. Each point must include a concrete, actionable advice line.\n\n**3. Formatting Constraints:** Use exactly:\n### Current Disagreements & Open Loops\n### Potential Future Friction Points\nUnder each, bullets in the form: '- <issue>. (<people involved>). **Advice:** <actionable step>'.\n\n**4. Negative Constraints:** Output ONLY the report. If no issues, respond exactly: `No significant disagreements or risks identified.`"
+  },
+  {
+    "task_name": "Communication Insights (SSC)",
+    "prompt": "**1. Role & Goal:** Act as an expert communications consultant and strategic coach.\n\n**2. Core Instruction:** (1) Analyze communication styles, dynamics, and subtext. (2) Produce a Start–Stop–Continue plan strictly tied to those insights.\n\n**3. Formatting Constraints:**\n### Key Communication Insights\n- Bullet each insight and justify with a specific example or quote (include speaker/timestamp when available).\n\n### Strategic Action Plan (Start-Stop-Continue)\n- **Start:** 1–3 concrete actions tied to insights.\n- **Stop:** 1–3 behaviors to discontinue, tied to insights.\n- **Continue:** 1–3 effective behaviors to maintain, tied to insights.\n\n**4. Negative Constraints:** No generic advice; every recommendation must trace to a specific evidenced insight."
+  },
+  {
+    "task_name": "Full Record Markdown",
+    "prompt": "**1. Role & Goal:** Act as a document formatter to re-render the transcript as a complete Markdown document.\n\n**2. Core Instruction:** Rewrite the entire transcript verbatim (wording preserved) into a single Markdown file with structure (title, meta, sections by timestamps).\n\n**3. Formatting Constraints:** Begin with an H1 title, then a meta line (date, participants if present). Use H2 headings for major time blocks; preserve speaker names and timestamps.\n\n**4. Negative Constraints:** Output ONLY the formatted Markdown. No commentary."
+  },
+  {
+    "task_name": "Timestamped Outline & Recipes",
+    "prompt": "**1. Role & Goal:** Act as a technical analyst/writer to produce a comprehensive, standalone Markdown outline so users can navigate details without watching the source.\n\n**2. Core Instruction:** Transform the entire transcript into a detailed, multi-section outline following the talk's logical flow. After the outline, add optional sections only if supported: 'Quick Process Recipes', 'Stand-out Quote', 'Call to Action', 'Top 3 Takeaways'.\n\n**3. Formatting Constraints:** H1 title is the video title. Provide a bold meta line with Speaker, Published Date (today's date), and estimated Run-time. Main section headings are H2 'HH:MM–HH:MM Descriptive Title'. Under each, list concrete details as '-' bullets (definitions, stats, pros/cons, code), using code blocks where relevant. 'Quick Process Recipes' is a Markdown table with columns: | Task | Timestamp | Steps |. 'Top 3 Takeaways' is a numbered list.\n\n**4. Negative Constraints:** Preserve original wording for quotes/commands/statistics. Output ONLY the Markdown; omit optional sections when not present."
+  },
+  {
+    "task_name": "Important Quotes",
+    "prompt": "**1. Role & Goal:** Act as a journalist capturing the most impactful statements.\n\n**2. Core Instruction:** Identify 3–5 of the most significant, insightful, or impactful quotes that capture the essence of the conversation. Quotes must be verbatim.\n\n**3. Formatting Constraints:** Output as bullets. For each, bold the timestamp (if present), include the speaker's name, then the verbatim quote text.\n\n**4. Negative Constraints:** If no valid quotes are found, respond exactly: `No significant quotes identified in this section.` Output ONLY the quotes or the fallback phrase."
+  },
+  {
+    "task_name": "Participants & Roles",
+    "prompt": "**1. Role & Goal:** Act as a meticulous meeting administrator whose sole job is to identify participants.\n\n**2. Core Instruction:** List every unique person speaking or mentioned by name. Include role only if explicitly stated.\n\n**3. Formatting Constraints:** Simple bulleted list. Use EXACT formats: '- **[Name]** ([Role])' if role known; else '- **[Name]**'. Alphabetize by last name when available; otherwise by first name.\n\n**4. Negative Constraints:** If no participants or roles are mentioned, respond exactly: `No participants identified in this section.` Output ONLY the list or the fallback phrase."
+  },
+  {
+    "task_name": "One-Paragraph Summary",
+    "prompt": "**1. Role & Goal:** Act as an executive assistant creating a concise summary for a busy stakeholder.\n\n**2. Core Instruction:** Produce one dense paragraph covering the meeting/presentation purpose, core problems, key decisions, and overall outcome—based solely on the transcript.\n\n**3. Formatting Constraints:** Output must be exactly one paragraph of prose.\n\n**4. Negative Constraints:** If no substantive points exist, respond exactly: `No summary points identified in this section.` Output ONLY the paragraph or the fallback phrase."
+  },
+  {
+    "task_name": "Overview Summary",
+    "prompt": "**1. Role & Goal:** Act as an analyst preparing a 1–2 page executive briefing.\n\n**2. Core Instruction:** Create a comprehensive overview covering agenda/purpose, core problems and solutions, major debates, and final outcomes including key decisions and action items.\n\n**3. Formatting Constraints:** Write well-structured prose organized into logical paragraphs (not bullets) that read as a formal summary report.\n\n**4. Negative Constraints:** If no substantive points exist, respond exactly: `No summary points identified in this section.` Output ONLY the summary or the fallback phrase."
+  }
+]

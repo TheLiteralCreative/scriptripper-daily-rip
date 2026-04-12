@@ -1,0 +1,43 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+vision/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+
+# macOS
+.DS_Store
+__MACOSX/
+
+# Archives & binaries
+*.zip
+*.tar.gz
+
+# Alembic (keep structure, not generated)
+# alembic/versions/*.py  ← uncomment if you want to exclude migrations
+
+# IDE
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,26 @@
+[
+  {
+    "task_name": "Audience Activation Artifacts",
+    "prompt": "Repurpose this transcript into a set of audience-ready artifacts. Generate: (1) 3 tweet-sized social snippets capturing the sharpest insights, (2) a slide outline (5–7 bullet points) for a summary presentation, (3) an FAQ block (3–5 questions a newcomer would ask, answered from the transcript), (4) 2 reflection prompts or coaching questions inspired by the content, and (5) a curated resource list of any tools, books, frameworks, or people mentioned. Label each section clearly. Use only content present in the transcript."
+  },
+  {
+    "task_name": "Tutorial Step-Down & Actionable How-To Extractor",
+    "prompt": "Convert any how-to, instructional, or process-oriented segments in this transcript into a numbered, executable step-by-step guide. For each procedure identified: list prerequisites, enumerate exact steps in imperative voice, note required inputs/outputs per step, add a validation checklist item per step, and append a brief troubleshooting note for the most likely failure point. If multiple distinct procedures are present, treat each as a separate numbered guide with a clear title. Output only what is supported by the transcript."
+  },
+  {
+    "task_name": "Content Nuggets",
+    "prompt": "Extract self-contained, reusable knowledge pieces from this transcript. A 'nugget' is a discrete insight, framework, statistic, definition, or principle that stands alone without context. For each nugget: assign a category label (e.g., Framework, Stat, Definition, Principle, Tip), provide the nugget text as a direct quote or tight paraphrase, and add a one-sentence contextual note explaining when or why it is useful. Group nuggets by category. Output only nuggets explicitly supported by the transcript."
+  },
+  {
+    "task_name": "Relationship & Dependency Map",
+    "prompt": "Map the conceptual relationships and dependencies discussed in this transcript. Identify: (1) concepts that must be understood before others (prerequisite chains), (2) concepts explicitly compared or contrasted, (3) concepts that reinforce or reference each other (cross-references), and (4) any sequences where one idea evolves into another over time. Present each relationship type under its own heading as a bulleted list in the form '- [Concept A] → [relationship type] → [Concept B]'. Use only relationships explicitly stated or clearly implied in the transcript."
+  },
+  {
+    "task_name": "Structural & Contextual Metadata",
+    "prompt": "Extract archival and structural metadata from this transcript. Capture: title (inferred if not stated), source URL (if mentioned), speaker name(s) and credentials (if stated), publish or recording date (if mentioned), estimated duration (from timestamps if present), intended audience level (beginner/intermediate/advanced — infer from language), primary topic tags (3–5 keywords), content format (lecture, interview, tutorial, panel, demo, other), and any visual or on-screen references described verbally. Output as a clean labeled list. Leave fields blank if not inferable from the transcript."
+  },
+  {
+    "task_name": "Quality & Credibility Signals",
+    "prompt": "Evaluate the quality and credibility of this content based solely on transcript evidence. Assess: (1) speaker credentials or authority signals (explicitly stated or clearly implied), (2) quality of evidence used (anecdote, case study, data/citation, expert opinion — note which), (3) strength of logical reasoning (sound, speculative, or unsupported — with examples), (4) consensus level (does the speaker acknowledge opposing views?), and (5) potential bias indicators (commercial interest, ideological framing, selective evidence). For each dimension, provide a one-line assessment and a supporting quote or example from the transcript. Do not introduce external knowledge."
+  }
+]
