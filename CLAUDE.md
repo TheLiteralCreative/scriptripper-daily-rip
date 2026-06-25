@@ -28,7 +28,8 @@ Archive lookup hierarchy: **Date → Subscription → Rip-Spec → Content**
 ## Architecture decisions (locked)
 
 - **Single FastAPI service** — no separate worker. Background tasks via `fastapi.BackgroundTasks`.
-- **Zero-cost stack:** Groq (LLM + transcription), Neon (PostgreSQL), Upstash (Redis), Cloudflare R2 (storage), Resend (email).
+- **Stack (corrected 2026-06-24 to match `.env` + reality):** Gemini default LLM (Anthropic / OpenAI / Groq also wired, provider-switchable via `DEFAULT_LLM_PROVIDER`); Groq Whisper for transcription; **Neon** PostgreSQL (schema live as of 2026-06-24); Redis (host TBD under NODE-01); Cloudflare R2 storage; **PurelyMail** email (NOT Resend). *(Prior header said "Groq LLM / Upstash / Resend" — superseded.)*
+- **Hosting (decided 2026-06-24):** Runs on **NODE-01** (always-on home server), **NOT Render** — reuses SignalRipper's Cloudflare Tunnel + launchd pattern. Render stays a later config flip if a SaaS trigger fires. Rationale + supersede note in SignalRipper's `docs/HOSTING-ROADMAP.md`.
 - **SQLAlchemy 2.0** — `Mapped`/`mapped_column` syntax throughout.
 - **SaaS-forward:** User IDs on all models. Auth layer exists from day one.
 - **Cron endpoint:** `POST /api/cron/daily-rip` protected by `Authorization: Bearer <CRON_SECRET_KEY>`.
@@ -52,6 +53,7 @@ Archive lookup hierarchy: **Date → Subscription → Rip-Spec → Content**
 | `docs/session-log/` | Per-session logs |
 | `docs/prompt-archive/` | Legacy prompt profiles (reference) |
 | `docs/ScriptRipper_Daily-Rip(pivot)/` | Original architecture plan + build instructions + credential guide |
+| `docs/deployment/` | Render deploy guide, Stripe billing guide, operations playbook — salvaged from the pre-pivot archive and rewritten for the current stack |
 | `.env` | Secrets (gitignored) — see `/env-setup` |
 
 ## Slash commands

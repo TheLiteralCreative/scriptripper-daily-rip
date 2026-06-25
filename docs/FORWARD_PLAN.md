@@ -1,7 +1,7 @@
 # ScriptRipper Daily Rip — Forward Plan
 
-**Last updated:** 2026-04-12
-**Current version:** 0.3.0 (scaffold complete — backend + frontend skeleton)
+**Last updated:** 2026-06-24
+**Current version:** 0.3.1 (database schema live on Neon — first migration `5e4aca780667` applied)
 **Architecture ref:** `docs/ScriptRipper_Daily-Rip(pivot)/ScriptRipper _Daily Rip_ Architecture & Pivot Plan.md`
 **Build instructions (legacy ref):** `docs/ScriptRipper_Daily-Rip(pivot)/ScriptRipper _Daily Rip_ Build Instructions for Claude Code.md`
 **Prompt archive:** `docs/prompt-archive/`
@@ -58,13 +58,13 @@ DailyReport             (date, status, archive_url)
 - **Backend:** FastAPI (single service, BackgroundTasks — no separate worker)
 - **LLM:** Gemini (default, confirmed from existing env) — Anthropic + OpenAI keys also present
 - **Transcription:** Groq Whisper Large V3
-- **Database:** Render PostgreSQL (existing, provisioned) — internal URL in `vision/scriptripper-api.env`; external URL needed for local Alembic runs
-- **Queue/cache:** Upstash Redis (existing, provisioned)
+- **Database:** **Neon** PostgreSQL (decided 2026-06-24). Schema live — migration `5e4aca780667` applied to `neondb`. Connection string in `.env` (`DATABASE_URL` + `DATABASE_URL_EXTERNAL`). *(Was: Render PostgreSQL — superseded.)*
+- **Queue/cache:** Redis — host TBD under NODE-01 (local Redis or Upstash). Render `scriptripper-redis` is legacy.
 - **Storage:** Cloudflare R2 / S3-compatible — bucket: `scriptripper-artifacts`
 - **Email:** PurelyMail (NOT Resend) — smtp.purelymail.com:587, from: noreply@scriptripper.com
 - **Payments:** Stripe (live keys present in env — handle with care)
 - **Monitoring:** Sentry (DSN configured in env)
-- **Deployment:** Render (existing services, keep them — `scriptripper-api.onrender.com`)
+- **Deployment:** **NODE-01** home server (decided 2026-06-24) — Cloudflare Tunnel + launchd, same pattern as SignalRipper. *(Was: Render — superseded; see CLAUDE.md + SignalRipper `HOSTING-ROADMAP.md` supersede note. The 4 stale `scriptripper-*` Render services are decommission candidates.)*
 - **Frontend:** TBD — first decision of Phase 0
 
 ---
@@ -88,21 +88,20 @@ DailyReport             (date, status, archive_url)
 
 ## UP NEXT
 
-1. **[YOU]** Add missing credentials to Render env vars (and local `.env` for dev):
-   - `GROQ_API_KEY` — for Whisper transcription
-   - `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT_URL` — Cloudflare R2
-   - `CRON_SECRET_KEY` — generate a random secret for the cron endpoint
-   - `DATABASE_URL_EXTERNAL` — Render external Postgres URL (for local Alembic runs)
-   - Fix `GOOGLE_CLIENT_SECRET` in `vision/scriptripper-api.env` (currently malformed — merged with SENTRY_DSN on line 13)
-2. **[YOU + CLAUDE]** Run first Alembic migration against Render Postgres (confirm before running)
-3. **[CLAUDE]** Phase 2: Wire service layer — verify Gemini, Groq Whisper, PurelyMail SMTP, R2 each work end-to-end with a quick test call
-4. **[CLAUDE]** Phase 3: Ingestion engine — `ingestion.py` with `check_subscriptions()`, RSS + YouTube + article paths, idempotency check
-5. **[CLAUDE]** Phase 4: Rip pipeline — task execution, document assembly, TOC generation
+> Credentials + first migration: **DONE 2026-06-24.** Env wired, schema live on Neon.
+
+1. **[CLAUDE]** App-runtime DB fix: `database_async_url` must handle Neon SSL — asyncpg rejects the `sslmode`/`channel_binding` query params that psycopg2 accepts. Strip/convert them for asyncpg before the app first connects. (Migration path already works; this is the *running app* path.)
+2. **[TOGETHER]** Bring ScriptRipper online on NODE-01: serve FastAPI via launchd, schedule the Daily Rip (launchd `StartCalendarInterval` or local cron → `POST /api/cron/daily-rip`), optional Cloudflare Tunnel + Access for the GUI. Reuse SignalRipper's `deploy/launchd/` + tunnel pattern.
+3. **[CLAUDE]** Phase 2: Verify service layer end-to-end — Gemini LLM, Groq Whisper, PurelyMail SMTP, R2 upload/download each get a minimal test call.
+4. **[CLAUDE]** Phase 3: Ingestion engine — `ingestion.py` with `check_subscriptions()`, RSS + YouTube + article paths, idempotency check.
+5. **[CLAUDE]** Phase 4: Rip pipeline — task execution, document assembly, TOC generation.
+6. **[YOU, low priority]** Rotate the GitHub PAT that was in the old root `.env` (backed up as `.env.backup_pre-wire`); decommission the 4 stale `scriptripper-*` Render services.
 
 ---
 
 ## Completed
 
+- ✓ **2026-06-24 session:** env wired (`vision/scriptripper-api.env` → root `.env`); fixed model name-collision (`date: Mapped[date]` in `report.py`) via `from __future__ import annotations`; fixed Alembic async/sync + SSL (sync psycopg2 + `sslmode=require`); **chose Neon** for DB; generated + applied first migration `5e4aca780667` — all 8 tables live; **hosting decision: NODE-01 over Render**; updated canon docs (this file, CLAUDE.md, SignalRipper HOSTING-ROADMAP supersede note, PORTFOLIO, CITY_PLAN).
 - ✓ Legacy codebase reconnaissance (read-only, GitHub) — 2026-04-12
 - ✓ Architecture contract established — 2026-04-12
 - ✓ Legacy prompt profiles archived to `docs/prompt-archive/` — 2026-04-12
@@ -120,10 +119,11 @@ DailyReport             (date, status, archive_url)
 
 | Decision | Owner | Blocking |
 |----------|-------|---------|
-| Frontend technology (Next.js / React SPA / other) | TOGETHER | Phase 0 scaffold |
 | Email recipient(s) — single address or configurable | YOU | Phase 5 |
 | Rip prompt redesign — adapt legacy 17 prompts or rewrite for new structure | TOGETHER | Phase 4 |
-| ~~Deployment target~~ | ~~YOU~~ | Resolved: Render, keep existing services |
+| ~~Frontend technology~~ | ~~TOGETHER~~ | Resolved: React SPA served by FastAPI (single service) |
+| ~~Deployment target~~ | ~~YOU~~ | Resolved 2026-06-24: **NODE-01** (was Render — superseded) |
+| ~~Database host~~ | ~~TOGETHER~~ | Resolved 2026-06-24: **Neon** (Postgres; schema live) |
 
 ---
 

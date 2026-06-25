@@ -6,9 +6,10 @@ aiofiles>=23.2.1
 
 # Database
 sqlalchemy>=2.0.0
+greenlet>=3.0.0          # required by SQLAlchemy async; not auto-installed on py3.9/arm64
 alembic>=1.13.0
-asyncpg>=0.29.0
-psycopg2-binary>=2.9.0
+asyncpg>=0.29.0          # async driver (live app)
+psycopg2-binary>=2.9.0   # sync driver (Alembic migrations)
 
 # Config
 pydantic>=2.0.0

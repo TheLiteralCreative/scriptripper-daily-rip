@@ -85,19 +85,28 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def database_async_url(self) -> str:
-        """Convert postgresql:// to postgresql+asyncpg:// for async SQLAlchemy."""
-        url = self.DATABASE_URL
+        """Async (asyncpg) URL for the live app. Strips libpq query params
+        (sslmode / channel_binding) that asyncpg does NOT accept — those are for
+        psycopg2/Alembic. SSL itself is supplied via connect_args in app.database.
+        """
+        url = self.DATABASE_URL.split("?", 1)[0]  # drop ?sslmode=...&channel_binding=...
         if url.startswith("postgresql://"):
-            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
         return url
 
     @computed_field
     @property
     def alembic_url(self) -> str:
-        """Sync URL for Alembic migrations. Uses external URL if set (local dev)."""
+        """Sync (psycopg2) URL for Alembic migrations. Uses the external URL
+        locally if set. Migrations run synchronously — async is only needed by
+        the live app. Force sslmode=require: Render external Postgres demands SSL.
+        """
         url = self.DATABASE_URL_EXTERNAL or self.DATABASE_URL
-        # Strip any +asyncpg driver suffix for sync Alembic use
-        return url.replace("+asyncpg", "")
+        url = url.replace("+asyncpg", "")  # ensure sync psycopg2 driver, not asyncpg
+        if "sslmode=" not in url:
+            sep = "&" if "?" in url else "?"
+            url = f"{url}{sep}sslmode=require"
+        return url
 
 
 settings = Settings()
