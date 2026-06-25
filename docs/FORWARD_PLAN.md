@@ -5,6 +5,7 @@
 **Architecture ref:** `docs/ScriptRipper_Daily-Rip(pivot)/ScriptRipper _Daily Rip_ Architecture & Pivot Plan.md`
 **Build instructions (legacy ref):** `docs/ScriptRipper_Daily-Rip(pivot)/ScriptRipper _Daily Rip_ Build Instructions for Claude Code.md`
 **Prompt archive:** `docs/prompt-archive/`
+**Original alpha (reference only):** `ScriptRipper_Archive_20260412.zip` → see "Reference Material — Original Alpha" below.
 
 ---
 
@@ -88,14 +89,24 @@ DailyReport             (date, status, archive_url)
 
 ## UP NEXT
 
-> Credentials + first migration: **DONE 2026-06-24.** Env wired, schema live on Neon.
+> **DONE 2026-06-24:** env wired; schema live on Neon; app-runtime DB connectivity (asyncpg/SSL) fixed + smoke-tested (`scripts/smoke_db.py`); FastAPI app boots & serves locally.
 
-1. **[CLAUDE]** App-runtime DB fix: `database_async_url` must handle Neon SSL — asyncpg rejects the `sslmode`/`channel_binding` query params that psycopg2 accepts. Strip/convert them for asyncpg before the app first connects. (Migration path already works; this is the *running app* path.)
-2. **[TOGETHER]** Bring ScriptRipper online on NODE-01: serve FastAPI via launchd, schedule the Daily Rip (launchd `StartCalendarInterval` or local cron → `POST /api/cron/daily-rip`), optional Cloudflare Tunnel + Access for the GUI. Reuse SignalRipper's `deploy/launchd/` + tunnel pattern.
-3. **[CLAUDE]** Phase 2: Verify service layer end-to-end — Gemini LLM, Groq Whisper, PurelyMail SMTP, R2 upload/download each get a minimal test call.
-4. **[CLAUDE]** Phase 3: Ingestion engine — `ingestion.py` with `check_subscriptions()`, RSS + YouTube + article paths, idempotency check.
-5. **[CLAUDE]** Phase 4: Rip pipeline — task execution, document assembly, TOC generation.
-6. **[YOU, low priority]** Rotate the GitHub PAT that was in the old root `.env` (backed up as `.env.backup_pre-wire`); decommission the 4 stale `scriptripper-*` Render services.
+### Road to a functional tool — build the pipeline FIRST, deploy to NODE-01 LAST
+
+**"Functional" = Phases 2–5 produce one real daily report emailed to you.** The scaffold is a
+shell (models, API, auth, DB, server) but the *engine* is not built: `app/api/cron.py` is a
+**stub**, and `app/services/ingestion.py` (Phase 3) does not exist. Deploying before the
+pipeline exists only schedules a job that calls a stub. Deployment is the wrapper, not the next step.
+
+1. **[CLAUDE]** Phase 2 — verify the service layer end-to-end with the real creds: Gemini LLM, Groq Whisper (**needs ffmpeg**), PurelyMail SMTP, R2 upload/download. (Written in April, never run.)
+2. **[CLAUDE]** Phase 3 — ingestion engine: `app/services/ingestion.py` (**does not exist**) — `check_subscriptions()`, RSS/feedparser, YouTube/yt-dlp, article/BeautifulSoup, idempotency on `(subscription_id, source_url)`.
+3. **[CLAUDE]** Phase 4 — rip pipeline: run rips against transcripts (`llm.py`), assemble `SubscriptionDocument`s + TOC.
+4. **[CLAUDE]** Phase 5 — delivery + archive: assemble `DailyReport` index, email via PurelyMail, archive to R2. **Wire `cron.py` to the real `run_daily_pipeline`** (replace the stub).
+5. **[TOGETHER]** First end-to-end on the laptop: create a User + one Subscription (via API/seed — GUI is Phase 6, so seed via API; note auth wrinkle in deploy doc), trigger the cron endpoint, confirm a real report lands in your inbox.
+6. **[TOGETHER]** Deploy to NODE-01 — full runbook in `docs/deployment/NODE-01-DEPLOYMENT.md` (launchd serve on :8001 + scheduled Daily Rip + optional Cloudflare Tunnel). Decommission stale Render services.
+7. **[YOU, low priority]** Rotate the GitHub PAT (in `.env.backup_pre-wire`).
+
+*Phase 6 (React GUI) can follow the headless tool — it's for setup/subscription management, not required for the cron+email path.*
 
 ---
 
@@ -163,6 +174,38 @@ Both matter. GUI for setup and subscription management. CLI remains valid. No sa
 
 ### On memory and continuity
 > "EVERY time I use Claude Code, if possible, I'd like you to learn from what we do and retain that knowledge in whatever way suits you and serves the process best. Optimization is what I'm after."
+
+---
+
+## Reference Material — Original Alpha (pre-pivot, scriptripper.com)
+
+The **first functional ScriptRipper** — the manual-transcript-upload alpha that ran at
+**scriptripper.com** — is preserved (not lost) inside `ScriptRipper_Archive_20260412.zip`
+(repo root; gitignored as `*.zip`). The current build is a ground-up rewrite, so this is
+**reference only** — but the UI and the worker/automation are worth mining, not reinventing.
+
+Inside the zip:
+
+- **`ScriptRipper/ScriptRipper+/`** — the most mature deployed version (web + api + worker;
+  `render.yaml` + `vercel.json`). This *is* the source of the legacy `scriptripper-web` /
+  `-api` / `-worker` Render services.
+  - **`web/`** — the interface Joel liked: **Next.js 14 + TypeScript + Tailwind + Radix UI +
+    React Query + Framer Motion**; `mammoth` (.docx upload parsing), `jszip` / `file-saver`
+    (output download). Strongest reference for the GUI (Phase 6). *Caveat:* it's Next.js,
+    whereas the pivot chose React-SPA-on-FastAPI — mine the design/components, not the
+    framework wholesale. (SignalRipper's FastAPI-served GUI is the other reference point.)
+  - **`api/`**, **`worker/`**, **`shared/`** — the original backend + background worker.
+- **`ScriptRipper/ScriptRipper-MVP/`** (`apps/` monorepo) and **`ScriptRipper/ScriptRipper_legacy/`**
+  — earlier iterations.
+- **`ScriptGetter/`** — a sibling **automated content-collection pipeline** project (blueprint +
+  punchlist + hosting notes). Directly relevant to Phase 3 (ingestion) and the
+  scheduled-collection vision — a prior attempt at exactly that problem.
+- **`ScriptRipper-ENV-REF/ScriptRipper.com/`** — env reference for the live site.
+
+To browse it, extract just the needed subtree (e.g. `ScriptRipper/ScriptRipper+/web/src/`
+*without* `node_modules` / `.next`) rather than the whole 448 MB archive. The same archive is
+also duplicated in the stale top-level `MANUS_Document_Repository/ScriptRipper_Re-Do/` copy
+(deletion-pending) — use the canonical one in this repo.
 
 ---
 
